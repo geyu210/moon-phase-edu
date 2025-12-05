@@ -155,7 +155,16 @@ const MoonPhaseEdu = () => {
                             </div>
                         </div>
                     </div>
-
+                    {/* 新增：专门针对满月疑惑的教育卡片 */}
+                    {phaseInfo.name.includes("满月") && (
+                        <div className="bg-blue-600/20 border border-blue-400/50 rounded-2xl p-4 animate-bounce-in">
+                            <h4 className="font-bold text-yellow-300 mb-1 text-sm">🤔 为什么地球没挡住阳光？</h4>
+                            <p className="text-xs text-blue-100 leading-relaxed">
+                                虽然月亮在地球背面，但它的轨道是<strong>倾斜</strong>的！
+                                大部分时候，太阳光会从地球的“头顶”或“脚下”穿过，直接照亮月亮，所以我们看到的是圆圆的满月。
+                            </p>
+                        </div>
+                    )}
                     <div className="bg-slate-800 rounded-3xl p-6 border border-slate-700">
                         <h3 className="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
                             <RotateCcw size={18} /> 时间控制器

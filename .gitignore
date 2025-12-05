@@ -21,3 +21,11 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.idea/inspectionProfiles/Project_Default.xml
+.idea/moon-phase-edu.iml
+.gitignore
+.idea/copilot.data.migration.agent.xml
+.idea/modules.xml
+.gitignore
+.gitignore
+.idea/vcs.xml
