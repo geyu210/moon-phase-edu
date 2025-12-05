@@ -5,9 +5,7 @@ const MoonPhaseEdu = () => {
     // 状态管理
     const [day, setDay] = useState(0); // 一年中的第几天 (0-365)
     const [isPlaying, setIsPlaying] = useState(false);
-
-    // ⭐️ 速度调整：默认中速设为 0.05 (原本的慢速)
-    const [speed, setSpeed] = useState(0.05);
+    const [speed, setSpeed] = useState(0.05); // 默认慢速，适合观察
     const requestRef = useRef();
 
     // 天文参数
@@ -53,9 +51,17 @@ const MoonPhaseEdu = () => {
     const moonAbsX = earthX + moonRelX;
     const moonAbsY = earthY + moonRelY;
 
-    // 3. 计算月相角度
+    // 3. 计算月相角度 (用于判断阶段)
+    // 0度=满月位置
     let phaseAngle = ((moonAngleRelative * 180 / Math.PI) + 180) % 360;
     if (phaseAngle < 0) phaseAngle += 360;
+
+    // 4. ✨ 核心计算：视觉倾角 ✨
+    // 计算从月球绝对位置指向太阳(0,0)的角度
+    // 这让右侧大月亮的亮面永远指向屏幕中心的太阳
+    const sunDirectionRad = Math.atan2(-moonAbsY, -moonAbsX);
+    // 转换为度数，用于 CSS rotate
+    const sunDirectionDeg = sunDirectionRad * (180 / Math.PI);
 
     // --- 获取月相名称 ---
     const getPhaseInfo = (angle) => {
@@ -100,8 +106,14 @@ const MoonPhaseEdu = () => {
     const currentTip = getDynamicTip();
 
     // 月相渲染组件
-    const MoonPhaseVisual = ({ angle }) => {
+    const MoonPhaseVisual = ({ angle, rotation }) => {
         const theta = angle % 360;
+
+        // 为了配合“追随太阳”的旋转，我们需要重新标准化渲染逻辑
+        // 我们总是渲染一个“右边亮”的基础形态，然后通过外部 rotation 来让它指向正确的方向
+        // 但是因为 phaseAngle 包含了 0-360 的变化，我们需要一个稍微聪明的转换
+
+        // 原始逻辑保持不变，负责“胖瘦”
         const isWaxing = theta <= 180;
         let scaleX = 0;
         if (theta <= 90) scaleX = -1 + (theta / 90);
@@ -113,8 +125,22 @@ const MoonPhaseEdu = () => {
         const ellipseColor = isEllipseWhite ? '#FDF6E3' : '#1a1a1a';
         const absScaleX = Math.abs(Math.cos(theta * Math.PI / 180));
 
+        // 视觉修正：
+        // 普通的月相图是 "North Up" (北极朝上)。
+        // 我们现在要让它 "Sun Up" (亮面朝向太阳)。
+        // 这需要一个额外的旋转容器
+
         return (
-            <div className="w-32 h-32 rounded-full bg-gray-900 relative overflow-hidden border-2 border-gray-700 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+            <div
+                className="w-32 h-32 rounded-full bg-gray-900 relative overflow-hidden border-2 border-gray-700 shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-transform duration-75 ease-linear"
+                style={{
+                    // 这里的 rotation 让我们的大月亮亮面始终指向太阳方向！
+                    // 这是一个非常酷的真实物理模拟
+                    transform: `rotate(${rotation}deg)`
+                }}
+            >
+                {/* 内部内容反向旋转文字？不，月球表面特征应该跟着转才对！*/}
+                {/* 所以我们保持内部不变，让整个球转动 */}
                 <div className="absolute inset-0 bg-[#FDF6E3]" style={{ clipPath: isWaxing ? 'polygon(50% 0, 100% 0, 100% 100%, 50% 100%)' : 'polygon(0 0, 50% 0, 50% 100%, 0 100%)' }}></div>
                 <div className="absolute top-0 bottom-0 left-1/2 w-full -translate-x-1/2 rounded-[50%]" style={{ backgroundColor: ellipseColor, transform: `translateX(-50%) scaleX(${absScaleX})`, zIndex: 10 }}></div>
             </div>
@@ -186,15 +212,7 @@ const MoonPhaseEdu = () => {
                                     >
                                         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#F4F6F0] from-50% to-black to-50%"></div>
                                     </div>
-
-                                    {/* ✨ 修复：红点旋转逻辑 ✨ */}
-                                    <div
-                                        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                                        style={{
-                                            // 关键修正：加上地球公转角度，完美抵消参考系变化
-                                            transform: `rotate(${moonAngleRelative + earthAngleRad}rad)`
-                                        }}
-                                    >
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ transform: `rotate(${moonAngleRelative + earthAngleRad}rad)` }}>
                                         <div className="absolute w-2 h-2 bg-red-500 rounded-full shadow-[0_0_4px_rgba(239,68,68,0.9)] border-[0.5px] border-white/50" style={{ left: -2 }}></div>
                                     </div>
                                 </div>
@@ -220,7 +238,8 @@ const MoonPhaseEdu = () => {
                                 <span className="text-sm font-bold text-indigo-100">从地球看月亮</span>
                             </div>
                             <div className="mb-6 scale-125 transform transition-transform duration-300 hover:scale-135 cursor-pointer" title="这是月亮现在的样子">
-                                <MoonPhaseVisual angle={phaseAngle} />
+                                {/* ✨ 这里的 rotation 让月亮的亮面始终指向太阳 */}
+                                <MoonPhaseVisual angle={phaseAngle} rotation={sunDirectionDeg} />
                             </div>
                             <div className="text-center h-20">
                                 <h2 className="text-2xl font-bold text-yellow-300 mb-2 transition-all">{phaseInfo.name}</h2>
@@ -251,16 +270,16 @@ const MoonPhaseEdu = () => {
                             </button>
                             <div className="flex items-center gap-2 bg-slate-700 px-3 py-3 rounded-xl">
                                 <span className="text-xs text-slate-400 whitespace-nowrap">速度:</span>
-                                {/* ⭐️ 速度按钮重新映射：0.01 / 0.05 / 0.2 */}
-                                <button onClick={() => setSpeed(0.01)} className={`w-8 h-8 rounded text-xs font-bold transition-colors ${speed === 0.01 ? 'bg-blue-500 text-white' : 'bg-slate-600 text-slate-300'}`}>慢</button>
-                                <button onClick={() => setSpeed(0.05)} className={`w-8 h-8 rounded text-xs font-bold transition-colors ${speed === 0.05 ? 'bg-blue-500 text-white' : 'bg-slate-600 text-slate-300'}`}>中</button>
-                                <button onClick={() => setSpeed(0.2)} className={`w-8 h-8 rounded text-xs font-bold transition-colors ${speed === 0.2 ? 'bg-blue-500 text-white' : 'bg-slate-600 text-slate-300'}`}>快</button>
+                                <button onClick={() => setSpeed(0.05)} className={`w-8 h-8 rounded text-xs font-bold transition-colors ${speed === 0.05 ? 'bg-blue-500 text-white' : 'bg-slate-600 text-slate-300'}`}>慢</button>
+                                <button onClick={() => setSpeed(0.2)} className={`w-8 h-8 rounded text-xs font-bold transition-colors ${speed === 0.2 ? 'bg-blue-500 text-white' : 'bg-slate-600 text-slate-300'}`}>中</button>
+                                <button onClick={() => setSpeed(0.8)} className={`w-8 h-8 rounded text-xs font-bold transition-colors ${speed === 0.8 ? 'bg-blue-500 text-white' : 'bg-slate-600 text-slate-300'}`}>快</button>
                             </div>
                         </div>
                     </div>
 
-                    <div className={`rounded-2xl p-4 flex items-start gap-3 transition-colors duration-500 border min-h-[8rem] ${currentTip.bg}`}>
-                        {currentTip.icon}
+                    {/* ⭐️ 修复跳动：使用固定高度 h-32 并用 flex-center 保持美观 */}
+                    <div className={`rounded-2xl p-4 flex items-center gap-3 transition-colors duration-500 border h-32 ${currentTip.bg}`}>
+                        <div className="self-start mt-1">{currentTip.icon}</div>
                         <div className="text-sm text-gray-200">
                             <strong className="text-yellow-200 block mb-1">{currentTip.title}</strong>
                             {currentTip.content}
