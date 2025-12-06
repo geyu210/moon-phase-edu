@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, Info, HelpCircle, RefreshCw } from 'lucide-react';
 
-const MoonPhaseEdu = () => {
+const MoonPhase = () => {
     // 状态管理
     const [day, setDay] = useState(0); // 一年中的第几天 (0-365)
     const [isPlaying, setIsPlaying] = useState(false);
@@ -291,4 +291,4 @@ const MoonPhaseEdu = () => {
     );
 };
 
-export default MoonPhaseEdu;
+export default MoonPhase;
