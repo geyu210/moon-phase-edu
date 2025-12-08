@@ -1,0 +1,33 @@
+🌕 Moon Phase Simulator (/moon)
+A fully functional interactive physics-based simulation.
+
+Dual Views:
+God Mode (Top-down): Shows the orbital mechanics of the Earth and Moon around the Sun.
+Earth Mode (Observer): Shows the moon phase as seen from Earth.
+Interactive Controls:
+Timeline slider to scrub through the year.
+Play/Pause and speed controls (Slow/Medium/Fast).
+Educational Content:
+Real-time calculation of moon phases (New Moon, Waxing Crescent, Full Moon, etc.).
+Dynamic "Smart Tips" that explain phenomena like why the moon glows or tidal locking.
+Visual correction to ensure the lit side of the moon always faces the sun.
+🚀 Escape Velocity Experiment (/escape)
+Status: Placeholder / In Development
+Concept: Intended to be an interactive lab to demonstrate escape velocity physics ("How fast do you need to throw a ball to leave Earth?").
+Current State: Contains static text and a placeholder div for the canvas/simulation.
+🏠 Home Page (/)
+Likely contains navigation cards to the various experiments (implied from structure).
+5. Observations & Recommendations
+Code Quality: The 
+MoonPhase.js
+ component works well but is quite large (>300 lines). It mixes physics logic, animation loops, and UI rendering.
+Refactoring Opportunity: Extract the physics calculations (orbital positions) into a custom hook (e.g., useOrbitalPhysics) to clean up the component.
+React 19: The project is using the latest React 19, which is excellent.
+Performance: The animation uses requestAnimationFrame, which is the correct approach for smooth simulations.
+Next Steps: The 
+EscapeVelocity
+ module is explicitly marked as "future work" in the code comments. This is a prime candidate for the next development task.
+6. How to Run
+Install dependencies: npm install
+Start local server: npm start
+Build for production: npm run build
